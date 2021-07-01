@@ -80,6 +80,9 @@ type Handler struct {
 	// The name of the web application as it is usually displayed to the user.
 	Name string
 
+	// Customize the body element before mounting
+	OnBody func(body HTMLBody)
+
 	// The cache that stores pre-rendered pages.
 	//
 	// Default is a LRU cache that keeps pages up to 24h and have a maximum size
@@ -611,6 +614,9 @@ func (h *Handler) servePage(w http.ResponseWriter, r *http.Request) {
 			Div().ID("app-pre-render").Body(content),
 		),
 	)
+	if h.OnBody != nil {
+		h.OnBody(body)
+	}
 	if err := mount(&disp, body); err != nil {
 		panic(errors.New("mounting pre-rendering container failed").
 			Tag("server-side", disp.runsInServer()).
